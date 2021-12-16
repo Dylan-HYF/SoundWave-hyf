@@ -11,10 +11,10 @@
 
   <script>
     const path = 'assets/'
-    const assets = ["b01.mp3", "b02.mp3", "b03.mp3", "b04.mp3", "b05.mp3", "b06.mp3", "b07.mp3", "b08.mp3", "b09.mp3", "b10.mp3", "backing.mp3", "blackball.mp3", "bounce.mp3", "end.mp3", "powerdown.mp3", "powerup.mp3", "slow.mp3", "start.mp3", "submit.mp3", "wallend.mp3", "wallstart.mp3"];
+    const assets = ["backing.mp3", 'TheRealFolkBlues.mp3'];
     createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
     // See Docs under Frame for FIT, FILL, FULL, and TAG scaling modes
-    const frame = new Frame(FIT, 1024, 768, light, dark, assets, path);
+    const frame = new Frame(FIT, 1024, 768, darker, dark, assets, path);
     frame.on("ready", () => {
       const stage = frame.stage;
       let stageW = frame.width;
@@ -29,51 +29,37 @@
       }).center();
       button.on('click', () => {
         button.removeFrom()
-        let soundWave = new SoundWave(50, asset("backing.mp3").play({ loop: true }))
+        let soundWave = new SoundWave(50, asset("TheRealFolkBlues.mp3").play({ loop: true }))
         // asset("b01.mp3").play()
         soundWave.on("ready", function () {
 
           // create a container for the bars so we can add them and then center the container on the stage
-          var bars = new zim.Container();
-          var width = stageW * .9; // leave a little around the sides...
-          var gap = 3;
+          let bars = new Container();
+          let width = stageW * .9; // leave a little around the sides...
+          let gap = 3;
 
           // we can use soundWave.num to tell us how many bars to make
-          zim.loop(soundWave.num, function (i, total) {
+          loop(soundWave.num, function (i, total) {
             // make each bar
-            var bar = new zim.Rectangle(width / total - gap, 300, frame.pink);
+            let bar = new Rectangle(width / total - gap, 300, pink);
             // move the bar over a little each time and set the registration point to the bottom
-            bar.addTo(bars).mov(i * width / total).reg(0, 300);
+            bar.addTo(bars).reg(bar.width / 2, 300).rot(i * 10)
           })
-          bars.center(stage);
+          bars.center();
 
           // animate the bars in a Ticker
-          zim.Ticker.add(function () {
+          Ticker.add(function () {
             // call the calculate() method of the soundWave
-            var data = soundWave.calculate();
+            let data = soundWave.calculate();
             // loop throught the bars and set the height of the bar to the associated soundWave data
             // we multiply by 2 to magnify the data a little
-            zim.loop(bars, function (bar, i) {
-              bar.heightOnly = data[i] * 2;
+            loop(bars, function (bar, i) {
+              bar.heightOnly = data[i] / 2;
             });
           }); // end ticker
 
 
 
-          new zim.Label({
-            text: "ZIM SoundWave - Easy Frequency Analysis",
-            color: frame.purple
-          })
-            .center(stage)
-            .mov(0, 220)
-            .animate({
-              obj: { alpha: 0 },
-              from: true,
-              wait: 1000,
-              time: 3000,
-              rewindWait: 5000,
-              rewind: true
-            });
 
         }); // end soundWave ready
         stage.update()
