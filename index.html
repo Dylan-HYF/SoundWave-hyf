@@ -11,7 +11,7 @@
 
   <script>
     const path = 'assets/'
-    const assets = ["backing.mp3", 'TheRealFolkBlues.mp3'];
+    const assets = ['TheRealFolkBlues.mp3', { src: "https://fonts.googleapis.com/css2?family=Luxurious+Script&display=swap" }];
     createjs.Sound.registerPlugins([createjs.HTMLAudioPlugin]);
     // See Docs under Frame for FIT, FILL, FULL, and TAG scaling modes
     const frame = new Frame(FIT, 1024, 768, darker, dark, assets, path);
@@ -19,49 +19,71 @@
       const stage = frame.stage;
       let stageW = frame.width;
       let stageH = frame.height;
+      // STYLE = { font: 'Luxurious Script' }
       // put your code here
-
       let button = new Button({
         label: "PLAY",
         backgroundColor: blue,
         rollBackgroundColor: pink,
         corner: 0
-      }).center();
+      }).center().animate({
+        props: { x: -300, alpha: 0 },
+        from: true,
+        ease: 'backOut'
+      })
       button.on('click', () => {
+        new Rectangle(stageW, stageH, darker).center()
         button.removeFrom()
         let soundWave = new SoundWave(50, asset("TheRealFolkBlues.mp3").play({ loop: true }))
         // asset("b01.mp3").play()
         soundWave.on("ready", function () {
 
-          // create a container for the bars so we can add them and then center the container on the stage
-          let bars = new Container();
-          let width = stageW * .9; // leave a little around the sides...
-          let gap = 3;
+          let bars = new Container().alp(0);
+          let width = stageW * .9;
+          let gap = 2;
 
-          // we can use soundWave.num to tell us how many bars to make
           loop(soundWave.num, function (i, total) {
-            // make each bar
-            let bar = new Rectangle(width / total - gap, 300, pink);
-            // move the bar over a little each time and set the registration point to the bottom
-            bar.addTo(bars).reg(bar.width / 2, 300).rot(i * 10)
+            let bar = new Rectangle(width / total - gap, 300, [green, pink, orange, blue, yellow]);
+            bar.addTo(bars).reg(bar.width / 2, 300).rot(i * 10).alp(.8)
           })
           bars.center();
+          timeout(.05, () => {
+            bars.alp(1)
+          })
 
-          // animate the bars in a Ticker
           Ticker.add(function () {
-            // call the calculate() method of the soundWave
             let data = soundWave.calculate();
-            // loop throught the bars and set the height of the bar to the associated soundWave data
-            // we multiply by 2 to magnify the data a little
             loop(bars, function (bar, i) {
               bar.heightOnly = data[i] / 2;
             });
-          }); // end ticker
+          });
+          const label = new Label({
+            text: 'The Real Folk Blues',
+            font: 'Luxurious Script',
+            color: white,
+            backgroundColor: pink,
+            size: 50
+          }).loc(50, 50).drag().transform({
+            stretchX: false,
+            stretchY: false,
+
+          })
+          const loader = new Loader()
+          const save = new Button({
+            backgroundColor: blue,
+            color: white,
+            label: 'SAVE'
+          }).pos(50, 50, RIGHT, BOTTOM)
+            .tap(() => {
+              save.removeFrom()
+              loader.save(stage, 'cover')
+              save.addTo()
+            })
+          // .sca(.8).pos(50, 120, RIGHT, BOTTOM);
 
 
 
-
-        }); // end soundWave ready
+        });
         stage.update()
       })
 
